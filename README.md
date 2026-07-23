@@ -66,13 +66,43 @@ Bounding boxes are saved in .csv files as below:
 | ... | ... |
 
 - **ts**: the global timestamp of the bounding box, in the unit of second.
-- **bbox**: the bounding boxes in dictionary, with  
+- **bbox**: the bounding boxes in the dictionary, with  
     {'x': x-axis of the topleft corner,  
      'y': y-axis of the topleft corner,  
      'w': width of the bounding box,  
      'h': height of the bounding box,  
      'class': object class of the bounding box}.  
-     s
+
+To prepare the data, use the global timestamp to align the events and bounding boxes. We provide an example to get the aligned data below:
+```python
+import h5py
+import hdf5plugin
+import pandas as pd
+import numpy as np
+from event_reader.eventslicer import EventSlicer
+
+# load action labels
+bbox_label_file = "" # path to the Annotations/objects/cooking_activity_LeftEvent_bbox.csv or Annotations/objects/cooking_activity_RightEvent_bbox.csv
+bbox_labels = pd.read_csv(bbox_label_file)
+
+# load events
+event_file = "" # path to the dataset/LeftEvent/LeftEvent.hdf5 or dataset/RightEvent/RightEvent.hdf5
+event_loader = EventSlicer(h5py.File(event_file, 'r'))
+   
+# align events and action
+for index, ts in bbox_labels["ts"].items():
+    delta_T = 0.033 # the event slice length to align the bounding boxes, unit is second
+    start_time = (ts - delta_T) * 1e6 # convert seconds to microseconds
+    end_time = ts * 1e6 # convert seconds to microseconds
+    label = bbox_labels.loc[index, "bbox"]
+    event_slice = event_loader.get_events(start_time, end_time)
+    aligned_data = [label, event_slice]
+
+    #####
+    ## your own data processing
+    #####
+
+```
 
 ### Depth Map
 The depth map
