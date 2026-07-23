@@ -135,7 +135,7 @@ The depth maps are saved in .avi videos. The corrsponding global timestamp per d
 | 3 | 1717341546.355427 |
 | ... | ... |
 
-We provide an example to extract depth maps from the video as below:
+We provide an example to extract and save depth maps from the video as below:
 ```python
 import cv2
 import pandas as pd
@@ -183,5 +183,5 @@ while True:
 
 cap.release()
 ```
-### Calibration
-We provide the calibration of 
+### Rectification
+To conduct the stereo depth estimation, the 
