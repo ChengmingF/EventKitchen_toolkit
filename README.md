@@ -5,9 +5,23 @@ This is the toolkit of the EventKitchen dataset from "Cooking beyond Frames: A S
 The dataset is collected with a stereo pair of Prophesee GEN4 cameras, a stereo pair of CMOS RGB cameras, an Intel RealSense D435i/D455, and a 9-axis IMU. Please refer to the [Project Page](https://chengmingf.github.io/EventKitchen.github.io/) to check the dataset structure.
 
 ## Load Events
-The collected events are saved in the [DSEC format](https://dsec.ifi.uzh.ch/data-format/), please refer to this [python script](event_reader/eventslicer.py) to load events. 
+The collected events are saved in the [DSEC format](https://dsec.ifi.uzh.ch/data-format/), please refer to this [python script](event_reader/eventslicer.py) to load events. You can easily load events as below:
+```python
+import h5py
+import hdf5plugin
+from event_reader.eventslicer import EventSlicer
 
-## Annotations / Ground Truth
+# load events
+event_file = "" # path to the dataset/LeftEvent/LeftEvent.hdf5 or dataset/RightEvent/RightEvent.hdf5
+event_loader = EventSlicer(h5py.File(event_file, 'r'))
+
+start_time = # the global start timestamp of a desired event slice, unit is microsecond
+end_time = # the global end timestamp of a desired event slice, unit is microsecond
+event_slice = event_loader.get_events(start_time, end_time)
+```
+
+## Action Recognition
+We introduce the groud truth and baselines for action recognition here.
 ### Action Segment
 The action annotations are saved in the .csv format as below:
 | Full_action_label | Action_label | Verb | Object | Global_start_time | Global_end_time | Length   |
@@ -54,7 +68,11 @@ for index, label in action_labels["Action_label"].items():
     #####
 
 ```
+### Baselines
+We evaluate [TSM](https://github.com/mit-han-lab/temporal-shift-module) and [Swin](https://github.com/SwinTransformer/Video-Swin-Transformer) for action recognition as reported in the paper. To reproduce the results, please refer to their official github repo. And all implementation details are reported in the supplemetary matirals.
 
+## Object Detection
+We introduce the groud truth and baselines for object detection here.
 ### Bounding Box
 Bounding boxes are saved in .csv files as below:
 | ts | bbox |
@@ -101,8 +119,68 @@ for index, ts in bbox_labels["ts"].items():
     #####
     ## your own data processing
     #####
-
 ```
 
-### Depth Map
-The depth map
+### Baselines
+We evaluate [YOLOv10](https://github.com/THU-MIG/yolov10), [RVT](https://github.com/uzh-rpg/rvt), and [EvRT-DETR](https://github.com/realtime-intelligence/evrt-detr) for object detection as reported in the paper. To reproduce the results, please refer to their official github repo. And all implementation details are reported in the supplemetary matirals.
+
+## Stereo Depth Estimation
+### Depth Maps
+The depth maps are saved in .avi videos. The corrsponding global timestamp per depth map is saved in .csv file as:
+| frame_id | timestamp |
+| --- | --- |
+| 0 | 1717341546.164076 |
+| 1 | 1717341546.231737 |
+| 2 | 1717341546.294798 |
+| 3 | 1717341546.355427 |
+| ... | ... |
+We provide an example to extract depth maps from the video as below:
+```python
+import cv2
+import pandas as pd
+from pathlib import Path
+
+# load depth video
+depth_video = "" # path to the dataset/DEPTH/DEPTH.avi
+depth_timestamp_file = "" # path to the dataset/DEPTH/DEPTH_timestamp.avi
+depth_timestamp = pd.read_csv(depth_timestamp_file)
+
+# save path
+output_dir = Path("") # path to save the depth frames
+output_dir.mkdir(parents=True, exist_ok=True)
+
+# start converting, the saved depth maps are in uint16
+cap = cv2.VideoCapture(
+    depth_video,
+    cv2.CAP_FFMPEG,
+    [cv2.CAP_PROP_CONVERT_RGB, 0],
+)
+
+if not cap.isOpened():
+    raise RuntimeError(f"Cannot open video: {depth_video}")
+frame_idx = 0
+
+while True:
+    success, frame = cap.read()
+
+    if not success:
+        break
+
+    if frame.dtype != "uint16":
+        raise TypeError(
+            f"Expected uint16 depth, but OpenCV returned {frame.dtype} "
+            f"with shape {frame.shape}"
+        )
+
+    frame_ts = depth_timestamp.loc[frame_idx, "timestamp"]
+    output_path = output_dir / f"{frame_ts:.06f}.tiff"
+
+    if not cv2.imwrite(str(output_path), frame):
+        raise RuntimeError(f"Failed to save: {output_path}")
+
+    frame_idx += 1
+
+cap.release()
+```
+### Calibration
+We provide the calibration of 
