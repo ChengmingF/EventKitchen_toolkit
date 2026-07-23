@@ -134,6 +134,7 @@ The depth maps are saved in .avi videos. The corrsponding global timestamp per d
 | 2 | 1717341546.294798 |
 | 3 | 1717341546.355427 |
 | ... | ... |
+
 We provide an example to extract depth maps from the video as below:
 ```python
 import cv2
