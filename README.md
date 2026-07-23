@@ -22,11 +22,11 @@ The action annotations are saved in the .csv format as below:
 - **Action_label**: composed as "Verb" + "Noun". This label used to train the **Action Recognition** baselines.
 - **Verb**: the verb component in the action label.
 - **Object**: the noun component in the action label.
-- **Global_start_time**: the global timestamp to locate the start of the action in multi-modal recordings.
-- **Global_end_time**: the end timestamp to locate the start of the action in multi-modal recordings.
+- **Global_start_time**: the global timestamp to locate the start of the action in multi-modal recordings, in the unit of second.
+- **Global_end_time**: the end timestamp to locate the start of the action in multi-modal recordings, in the unit of second.
 - **Length**: the time length of the action segment.
 
-To prepare the data, use the global start and end timestamp to align the events and action segments
+To prepare the data, use the global start and end timestamp to align the events and action segments. We provide an example to get the aligned data below:
 ```python
 import h5py
 import hdf5plugin
@@ -35,11 +35,11 @@ import numpy as np
 from event_reader.eventslicer import EventSlicer
 
 # load action labels
-action_label_file = ""
+action_label_file = "" # path to the Annotations/actions/cooking_activity_action.csv
 action_labels = pd.read_csv(action_label_file)
 
 # load events
-event_file = ""
+event_file = "" # path to the dataset/LeftEvent/LeftEvent.hdf5 or dataset/RightEvent/RightEvent.hdf5
 event_loader = EventSlicer(h5py.File(event_file, 'r'))
    
 # align events and action
@@ -55,9 +55,8 @@ for index, label in action_labels["Action_label"].items():
 
 ```
 
-
 ### Bounding Box
-Bounding boxes are saved in csv files as follows:
+Bounding boxes are saved in .csv files as below:
 | ts | bbox |
 | --- | --- |
 | 1704552350.708145 | [{'x': 848, 'y': 127, 'w': 337, 'h': 326, 'class': 'Box'}] |
@@ -65,6 +64,15 @@ Bounding boxes are saved in csv files as follows:
 | 1704552370.80641 | [{'x': 376, 'y': 186, 'w': 288, 'h': 338, 'class': 'Box'}, {'x': 429, 'y': 8, 'w': 499, 'h': 573, 'class': 'Bowl'}] |
 | 1704552374.8697 | [{'x': 558, 'y': 14, 'w': 585, 'h': 539, 'class': 'Bowl'}, {'x': 453, 'y': 436, 'w': 331, 'h': 276, 'class': 'Box'}] |
 | ... | ... |
+
+- **ts**: the global timestamp of the bounding box, in the unit of second.
+- **bbox**: the bounding boxes in dictionary, with  
+    {'x': x-axis of the topleft corner,  
+     'y': y-axis of the topleft corner,  
+     'w': width of the bounding box,  
+     'h': height of the bounding box,  
+     'class': object class of the bounding box}.  
+     s
 
 ### Depth Map
 The depth map
