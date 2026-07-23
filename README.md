@@ -18,12 +18,12 @@ The action annotations are saved in the .csv format as below:
 |Throw waste into bin | Throw waste | Throw | waste | 1704552575.00379 | 1704552583.475926 | 8.472136 |
 | ... | ... | ... | ... | ... | ... | ... |
 
-Full_action_label: A finer label of the action.
-Action_label: composed as "Verb" + "Noun". This label used to train the **Action Recognition** baselines.
-Verb: the verb component in the action label.
-Object: the noun component in the action label.
-Global_start_time: the global timestamp to locate the start of the action in multi-modal recordings.
-Global_end_time: the end timestamp to locate the start of the action in multi-modal recordings.
+- **Full_action_label**: A finer label of the action.
+- **Action_label**: composed as "Verb" + "Noun". This label used to train the **Action Recognition** baselines.
+- **Verb**: the verb component in the action label.
+- **Object**: the noun component in the action label.
+- **Global_start_time**: the global timestamp to locate the start of the action in multi-modal recordings.
+- **Global_end_time**: the end timestamp to locate the start of the action in multi-modal recordings.
 
 ### Bounding Box
 Bounding boxes are saved in csv files as follows:
