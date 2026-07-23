@@ -10,7 +10,7 @@ The collected events are saved in the [DSEC format](https://dsec.ifi.uzh.ch/data
 ## Annotations / Ground Truth
 ### Action Segment
 The action annotations are saved in the .csv format as below:
-| Full_action_label | Action_label | Verb | Object | Global_start_time | Global_end_time | length   |
+| Full_action_label | Action_label | Verb | Object | Global_start_time | Global_end_time | Length   |
 | --- | --- | --- | --- | --- | --- | --- |
 |Take fruit         | Take fruit | Take | fruit | 1704552331.171166 | 1704552336.109683 | 4.938517 |
 |Take bowl          | Take bowl	| Take | bowl | 1704552356.661439 | 1704552359.6558 | 2.994361 |
@@ -18,12 +18,43 @@ The action annotations are saved in the .csv format as below:
 |Throw waste into bin | Throw waste | Throw | waste | 1704552575.00379 | 1704552583.475926 | 8.472136 |
 | ... | ... | ... | ... | ... | ... | ... |
 
-- **Full_action_label**: A finer label of the action.
+- **Full_action_label**: the full label of the action.
 - **Action_label**: composed as "Verb" + "Noun". This label used to train the **Action Recognition** baselines.
 - **Verb**: the verb component in the action label.
 - **Object**: the noun component in the action label.
 - **Global_start_time**: the global timestamp to locate the start of the action in multi-modal recordings.
 - **Global_end_time**: the end timestamp to locate the start of the action in multi-modal recordings.
+- **Length**: the time length of the action segment.
+
+To prepare the data, use the global start and end timestamp to align the events and action segments
+```python
+import h5py
+import hdf5plugin
+import pandas as pd
+import numpy as np
+from event_reader.eventslicer import EventSlicer
+
+# load action labels
+action_label_file = ""
+action_labels = pd.read_csv(action_label_file)
+
+# load events
+event_file = ""
+event_loader = EventSlicer(h5py.File(event_file, 'r'))
+   
+# align events and action
+for index, label in action_labels["Action_label"].items():
+    start_time = action_labels.loc[index, "Global_start_time"] * 1e6 # convert seconds to microseconds
+    end_time = action_labels.loc[index, "Global_end_time"] * 1e6 # convert seconds to microseconds
+    event_slice = event_loader.get_events(start_time, end_time)
+    aligned_data = [label, event_slice]
+
+    #####
+    ## your own data processing
+    #####
+
+```
+
 
 ### Bounding Box
 Bounding boxes are saved in csv files as follows:
