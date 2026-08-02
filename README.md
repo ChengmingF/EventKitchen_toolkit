@@ -1,8 +1,8 @@
 # EventKitchen_toolkit
-This is the toolkit of the EventKitchen dataset from "Cooking beyond Frames: A Stereo Event Camera Dataset in the Kitchen." 
+This is the toolkit of the EventKitchen dataset from our ECCV 2026 paper "Cooking beyond Frames: A Stereo Event Camera Dataset in the Kitchen." 
 
 ## Dataset Structure
-The dataset is collected with a stereo pair of Prophesee GEN4 cameras, a stereo pair of CMOS RGB cameras, an Intel RealSense D435i/D455, and a 9-axis IMU. Please refer to the [Project Page](https://chengmingf.github.io/EventKitchen.github.io/) to check the dataset structure.
+The dataset is collected with a stereo pair of Prophesee GEN4 cameras, a stereo pair of CMOS RGB cameras, an Intel RealSense D435i/D455, and a 9-axis IMU. Please refer to the [Project Page](https://chengmingf.github.io/EventKitchen.github.io/download.html) to check the dataset structure.
 
 ## Load Events
 The collected events are saved in the [DSEC format](https://dsec.ifi.uzh.ch/data-format/), please refer to this [python script](event_reader/eventslicer.py) to load events. You can easily load events as below:
@@ -21,7 +21,7 @@ event_slice = event_loader.get_events(start_time, end_time)
 ```
 
 ## Action Recognition
-We introduce the groud truth and baselines for action recognition here.
+<!-- We introduce the groud truth and baselines for action recognition here. -->
 ### Action Segment
 The action annotations are saved in the .csv format as below:
 | Full_action_label | Action_label | Verb | Object | Global_start_time | Global_end_time | Length   |
@@ -61,18 +61,19 @@ for index, label in action_labels["Action_label"].items():
     start_time = action_labels.loc[index, "Global_start_time"] * 1e6 # convert seconds to microseconds
     end_time = action_labels.loc[index, "Global_end_time"] * 1e6 # convert seconds to microseconds
     event_slice = event_loader.get_events(start_time, end_time)
-    aligned_data = [label, event_slice]
+    aligned_data = [label, event_slice] # the alinged action label and event sclice 
 
     #####
     ## your own data processing
     #####
-
 ```
+
+
 ### Baselines
 We evaluate [TSM](https://github.com/mit-han-lab/temporal-shift-module) and [Swin](https://github.com/SwinTransformer/Video-Swin-Transformer) for action recognition as reported in the paper. To reproduce the results, please refer to their official github repo. And all implementation details are reported in the supplemetary matirals.
 
 ## Object Detection
-We introduce the groud truth and baselines for object detection here.
+<!-- We introduce the groud truth and baselines for object detection here. -->
 ### Bounding Box
 Bounding boxes are saved in .csv files as below:
 | ts | bbox |
@@ -114,7 +115,7 @@ for index, ts in bbox_labels["ts"].items():
     end_time = ts * 1e6 # convert seconds to microseconds
     label = bbox_labels.loc[index, "bbox"]
     event_slice = event_loader.get_events(start_time, end_time)
-    aligned_data = [label, event_slice]
+    aligned_data = [label, event_slice] # the alinged bounding box and event sclice
 
     #####
     ## your own data processing
@@ -125,6 +126,7 @@ for index, ts in bbox_labels["ts"].items():
 We evaluate [YOLOv10](https://github.com/THU-MIG/yolov10), [RVT](https://github.com/uzh-rpg/rvt), and [EvRT-DETR](https://github.com/realtime-intelligence/evrt-detr) for object detection as reported in the paper. To reproduce the results, please refer to their official github repo. And all implementation details are reported in the supplemetary matirals.
 
 ## Stereo Depth Estimation
+To prepare the stereo depth estimation, the first step is to convert the depth videos to depth map; the second setp is to convert the 
 ### Depth Maps
 The depth maps are saved in .avi videos. The corrsponding global timestamp per depth map is saved in .csv file as:
 | frame_id | timestamp |
@@ -184,4 +186,31 @@ while True:
 cap.release()
 ```
 ### Rectification
-To conduct the stereo depth estimation, the 
+To conduct the stereo depth estimation, you need to firstly project the depth map to the left event camera, then recitify the left event camera, right event camera camera, and
+the projected depth. Follow the listed steps to prepare the data:
+
+1. Download the calibration results and unzip, see [Project Page](https://chengmingf.github.io/EventKitchen.github.io/download.html).
+2. We provide a [python script](calibration_loader/EventKitchen_Calibration.py) for loading the calibration matrix. Below is an example code to rectify the data.
+```python
+import cv2
+import h5py
+import hdf5plugin
+import os
+from glob import glob
+from event_reader.eventslicer import EventSlicer
+from calibration_loader.EventKitchen_Calibration import Calibration_Loader
+
+# load events
+event_file = "" # path to the dataset/LeftEvent/LeftEvent.hdf5 or dataset/RightEvent/RightEvent.hdf5
+event_loader = EventSlicer(h5py.File(event_file, 'r'))
+
+# load depth
+depth_map_path = "" # the path to the saved depth maps
+depth_maps = glob(os.path.join(depth_map_path, '*.tiff'))
+
+####
+## better to check 
+####  
+
+```
+
