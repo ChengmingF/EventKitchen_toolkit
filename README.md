@@ -201,16 +201,72 @@ from event_reader.eventslicer import EventSlicer
 from calibration_loader.EventKitchen_Calibration import Calibration_Loader
 
 # load events
-event_file = "" # path to the dataset/LeftEvent/LeftEvent.hdf5 or dataset/RightEvent/RightEvent.hdf5
-event_loader = EventSlicer(h5py.File(event_file, 'r'))
+leftevent_file = "" # path to the dataset/LeftEvent/LeftEvent.hdf5 
+rightevent_file = "" # path to the dataset/RightEvent/RightEvent.hdf5
+leftevent_loader = EventSlicer(h5py.File(leftevent_file, 'r'))
+rightevent_loader = EventSlicer(h5py.File(rightevent_file, 'r'))
 
-# load depth
+# load depth maps
 depth_map_path = "" # the path to the saved depth maps
 depth_maps = glob(os.path.join(depth_map_path, '*.tiff'))
 
-####
-## better to check 
-####  
+# load calibration 
+calibration_path = "" # the path to the saved calibration results
+calibrator = Calibration_Loader(calibration_path)
 
+### start to rectify data
+deltaT = 1/30 # the window length of the event slice to align the depth map
+for m in depth_maps:
+    ts = float(m.split('/')[-1][:-4]) # the timestamp of the depth map
+    event_start_ts, event_end_ts = (ts - deltaT) * 1e6, ts * 1e6 # the timestamp of the aligned event slice
+    depth = cv2.imread(m, -1).astype(np.int16) # read depth
+    leftevent_slice = leftevent_loader.get_events(event_start_ts, event_end_ts) # load the aligned left event
+    rightevent_slice = rightevent_loader.get_events(event_start_ts, event_end_ts) # load the aligned right event
+    
+    ## project depth to the fov of left event camera, unit is in millimeter
+    # undistort depth
+    map1, map2 = cv2.initUndistortRectifyMap(
+        K, D, R=np.eye(3), newCameraMatrix=calibrator.DRGB_intrinsic_matrix, size=(1280, 720), m1type=cv2.CV_32FC1
+    )
+    depth_undist = cv2.remap(
+        depth, map1, map2,
+        interpolation=cv2.INTER_NEAREST,
+        borderMode=cv2.BORDER_CONSTANT,
+        borderValue=0
+    )
+    # project depth
+    proj_depth2left = calibrator.project_depth_to_event(
+        depth0_mm=depth_undist,
+        K0=calibrator.DRGB_intrinsic_matrix,
+        K1=calibrator.LeftEvent_intrinsic_matrix,
+        R_0to1=calibrator.rotation_matrix_DRGB_LeftEvent,
+        T_0to1_mm=calibrator.translation_matrix_DRGB_LeftEvent,       
+    )
+    # ## project depth to the fov of left event camera, unit is in millimeter
+    # proj_depth2right = calibrator.project_depth_to_event(
+    #     depth0_mm=depth,
+    #     K0=calibrator.DRGB_intrinsic_matrix,
+    #     K1=calibrator.RightEvent_intrinsic_matrix,
+    #     R_0to1=calibrator.rotation_matrix_DRGB_RightEvent,
+    #     T_0to1_mm=calibrator.translation_matrix_DRGB_RightEvent,       
+    # )
+
+    ## rectify projected depth, left event, and right event
+    # rectify projected depth
+    rectified_LeftDepth = cv2.remap(proj_depth2left,
+                                    self.stereoMapLeftEvent_X,
+                                    self.stereoMapLeftEvent_Y,
+                                    cv2.INTER_LINEAR)
+    # rectify left event
+    rectified_LeftEvent = cv2.remap(event0_image,
+                                    self.stereoMapLeftEvent_X,
+                                    self.stereoMapLeftEvent_Y,
+                                    cv2.INTER_LINEAR)
+
+    # rectify right event
+    rectified_RightEvent = cv2.remap(event0_image,
+                                     self.stereoMapRightEvent_X,
+                                     self.stereoMapRightEvent_Y,
+                                     cv2.INTER_LINEAR)
 ```
 

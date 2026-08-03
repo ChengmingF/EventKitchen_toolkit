@@ -43,7 +43,10 @@ class Calibration_Loader():
 
         #### Read DRGB -- LeftEvent extrinsic matrix
         self.rotation_matrix_DRGB_LeftEvent, self.translation_matrix_DRGB_LeftEvent, _, _, _, _ = self.read_extrinsic_calibration(calibration_path, camA='DRGB', camB='LeftEvent')
-
+        
+        # #### Read DRGB -- RighttEvent extrinsic matrix
+        # self.rotation_matrix_DRGB_RightEvent, self.translation_matrix_DRGB_RightEvent, _, _, _, _ = self.read_extrinsic_calibration(calibration_path, camA='DRGB', camB='RightEvent')
+        
         ####
         # add code to load the extrinsic matrix for LeftRGB and RightRGB if you need
         ####
@@ -56,7 +59,6 @@ class Calibration_Loader():
         _distortion_matrix = _intrinsic_loader.getNode('Distortion_Matrix').mat()
 
         return _intrinsic_matrix, _distortion_matrix
-    
 
     def read_extrinsic_calibration(self, calibration_path, camA, camB):
         _extrinsic_file = os.path.join(calibration_path, f'calibration_results/stereo_calibration_results/{camA}_{camB}_stereo_calibration.xml')
@@ -71,176 +73,103 @@ class Calibration_Loader():
 
         return _rotation_matrix, _translation_matrix, _stereoMapA_X, _stereoMapA_Y, _stereoMapB_X, _stereoMapB_Y    
 
-
-    def fast_reproject(self, depth_map, cameraB_instrinsic_matrix, translation_matrix, rotation_matrix):
-        # create a meshgrid of pixel coordinates in DRGB (cam A)
-        x_A, y_A = np.meshgrid(np.arange(1280), np.arange(720))
-
-        # convert 2d coordiantes into normalized 3d
-        Z = depth_map
-        X = (x_A - self.DRGB_intrinsic_matrix[0, 2]) * Z / self.DRGB_intrinsic_matrix[0, 0]
-        Y = (y_A - self.DRGB_intrinsic_matrix[1, 2]) * Z / self.DRGB_intrinsic_matrix[1, 1]
-
-        # Stack X, Y, and Z to form 3D points in Camera A's coordinate frame
-        points_3D_A = np.vstack((X.flatten(), Y.flatten(), Z.flatten())).T
-
-        # Apply rotation and translation to get points in Camera B's coordinate system
-        points_3D_B = np.dot(rotation_matrix, points_3D_A.T) + translation_matrix.reshape(3, 1)
-        points_3D_B = points_3D_B.T
-
-        # Project 3D points in Camera B's coordinates into Camera B's image plane
-        points_2D_B = np.dot(cameraB_instrinsic_matrix, points_3D_B.T)
-
-        # Normalize to get pixel coordinates (divide by the Z coordinate)
-        points_2D_B[0, :] /= points_2D_B[2, :]
-        points_2D_B[1, :] /= points_2D_B[2, :]
-
-        # Extract pixel coordinates in Camera B's image
-        x_B = points_2D_B[0, :].reshape(720, 1280).astype(np.float32)
-        y_B = points_2D_B[1, :].reshape(720, 1280).astype(np.float32)
-
-        # Create a mask to identify valid pixels
-        mask = (x_B >= 0) & (x_B < 1280) & (y_B >= 0) & (y_B < 720)
-        
-        # Create maps for remapping Camera A's frame to Camera B's image coordinates
-        map_x_B = np.where(mask, x_B, 0)  # Only valid x_B coordinates
-        map_y_B = np.where(mask, y_B, 0)  # Only valid y_B coordinates
-
-        # Optionally, you can clip the maps to the valid range of Camera B's image size
-        map_x_B = np.clip(map_x_B, 0, 1280 - 1)
-        map_y_B = np.clip(map_y_B, 0, 720 - 1)
-
-        # Warp Camera A's image to Camera B's perspective
-        # Create an empty image for the projected output
-        new_depth = np.zeros_like(depth_map)
-
-        # Only warp the valid pixels from frame_A_undistorted to frame_A_warped_to_B
-        new_depth[y_B[mask].astype(int), x_B[mask].astype(int)] = depth_map[y_A[mask].astype(int), x_A[mask].astype(int)]
-
-        # post processing
-        new_depth = self.interpolation_after_projection(new_depth)
-
-        return new_depth
-
-
-    def interpolation_after_projection(self, image):
-        # convert to torch tensor
-        image = torch.from_numpy(image).reshape(1, 1, 720, 1280).type(torch.float32)
-        # maxpooling to vanish the 0 value in the projected image
-        pool = nn.MaxPool2d(kernel_size=4, stride=1)
-        image = pool(image)
-        image = image.reshape(image.shape[2], image.shape[3])
-        # to array
-        image = np.array(image)
-        # resize back to (1280, 720)
-        projected_frame = cv2.resize(image, (1280, 720), interpolation=cv2.INTER_LINEAR)
-
-        return projected_frame
-
-
-    def undistort_image(self, img, intinsic_matrix, distortion_matrix):
-        newcameramtx, roi = cv2.getOptimalNewCameraMatrix(intinsic_matrix,
-                                                          distortion_matrix,
-                                                          (1280,720),
-                                                          1,
-                                                          (1280,720))
-        dst = cv2.undistort(img, intinsic_matrix, distortion_matrix, None, newcameramtx)
-
-        return dst, newcameramtx
-
-
-    def project_and_rectify(self, ts):
+    def project_depth_to_event(
+        self,
+        depth0_mm: np.ndarray,    # (H0, W0) uint16 depth in mm, undistorted already, 0 invalid
+        K0: np.ndarray,           # (3,3) intrinsics that MATCH the undistorted cam0 depth
+        K1: np.ndarray,           # (3,3) intrinsics for event cam image (target)
+        R_0to1: np.ndarray,       # (3,3) cam0 -> cam1
+        T_0to1_mm: np.ndarray,    # (3,) or (3,1) cam0 -> cam1 translation in millimeters
+        event_size: tuple,        # (W1, H1)
+    ):
         """
-        This function can return the rectified LeftEvent frames, RightEvent frames, and depth map based on the prefixed timestamp of LeftEvent
+        Output:
+        depth1_mm : (H1,W1) uint16 (0 invalid)
+        Notes:
+        - Uses bilinear splatting to reduce holes
+        - Uses per-pixel z-buffer so nearer points win (keeps occlusions correct)
         """
-        """
-        read images
-        """ 
-        # LeftEvent
-        LeftEvent_img = os.path.join(self.LeftEvent_data_path, f'{"%.6f"%ts}.png')
-        LeftEvent_image = cv2.imread(LeftEvent_img)
-        # synced(nearst) depth
-        depth_ts = self.DEPTH_ts[np.where(np.abs(self.DEPTH_ts-ts) == np.abs(self.DEPTH_ts-ts).min())][0]
-        depth_img = os.path.join(self.DEPTH_data_path, 
-                                 f'{"%.6f"%depth_ts}.tif')
-        depth_map = cv2.imread(depth_img, -1).astype(np.int16)
-        # synced(nearst) RightEvent
-        RightEvent_ts = self.RightEvent_ts[np.where(np.abs(self.RightEvent_ts-ts) == np.abs(self.RightEvent_ts-ts).min())][0]
-        RightEvent_img = os.path.join(self.RightEvent_data_path, 
-                                  f'{"%.6f"%RightEvent_ts}.png')
-        
-        RightEvent_image = cv2.imread(RightEvent_img)
-  
+        W1, H1 = event_size
+        H0, W0 = depth0_mm.shape
 
-        """
-        project depth to the FOV of LeftEvent
-        """
-        # undistort image
-        depth_map, self.DRGB_intrinsic_matrix = self.undistort_image(depth_map,
-                                                                     self.DRGB_intrinsic_matrix,
-                                                                     self.DRGB_distortion_matrix)
-        LeftEvent_image, self.LeftEvent_intrinsic_matrix = self.undistort_image(LeftEvent_image,
-                                                                          self.LeftEvent_intrinsic_matrix,
-                                                                          self.LeftEvent_distortion_matrix)
-        RightEvent_image, self.RightEvent_intrinsic_matrix = self.undistort_image(RightEvent_image,
-                                                                          self.RightEvent_intrinsic_matrix,
-                                                                          self.RightEvent_distortion_matrix)
-        # project
-        projected_depth = self.fast_reproject(depth_map=depth_map,
-                                              cameraB_instrinsic_matrix=self.LeftEvent_intrinsic_matrix,
-                                              translation_matrix=self.translation_matrix_DRGB_LeftEvent,
-                                              rotation_matrix=self.rotation_matrix_DRGB_LeftEvent)
+        # Convert depth to meters
+        Z0 = depth0_mm.astype(np.float32) * 0.001
+        valid = Z0 > 0
+        if not np.any(valid):
+            return np.zeros((H1, W1), dtype=np.uint16)
 
-        """
-        Rectify LeftEvent, RightEvent, and projected depth
-        """
-        # rectify images
-        rectified_LeftEvent_image = cv2.remap(LeftEvent_image,
-                                 self.stereoMapLeftEvent_X,
-                                 self.stereoMapLeftEvent_Y,
-                                 cv2.INTER_LINEAR)
-        rectified_RightEvent_image = cv2.remap(RightEvent_image,
-                                 self.stereoMapRightEvent_X,
-                                 self.stereoMapRightEvent_Y,
-                                 cv2.INTER_LINEAR)
-        rectified_projected_depth = cv2.remap(projected_depth,
-                                    self.stereoMapLeftEvent_X,
-                                    self.stereoMapLeftEvent_Y,
-                                    cv2.INTER_LINEAR)
+        # Pixel grid in cam0
+        u0 = np.arange(W0, dtype=np.float32)
+        v0 = np.arange(H0, dtype=np.float32)
+        uu0, vv0 = np.meshgrid(u0, v0)
 
-        f = plt.figure()
-        ax = f.add_subplot(1, 3, 1)
-        ax.imshow(rectified_LeftEvent_image)
-        ax.set_title(f'Rectified_LeftEvent - {ts}')
+        uu0 = uu0[valid]
+        vv0 = vv0[valid]
+        z0 = Z0[valid]
 
-        ax = f.add_subplot(1, 3, 2)
-        ax.imshow(rectified_RightEvent_image)
-        ax.set_title(f'Rectified_LeftEvent - {RightEvent_ts}')
+        # Backproject (cam0) in meters
+        fx0, fy0 = K0[0, 0], K0[1, 1]
+        cx0, cy0 = K0[0, 2], K0[1, 2]
+        X0 = (uu0 - cx0) * z0 / fx0
+        Y0 = (vv0 - cy0) * z0 / fy0
 
-        ax = f.add_subplot(1, 3, 3)
-        ax.imshow(rectified_projected_depth)
-        ax.set_title(f'Rectified_DEPTH - {depth_ts}')
+        P0 = np.stack([X0, Y0, z0], axis=0)  # (3,N)
 
-        plt.show()
+        # Transform to cam1
+        R = R_0to1.astype(np.float32)
+        T = T_0to1_mm.reshape(3, 1).astype(np.float32) * 0.001
+        P1 = R @ P0 + T
 
-        return rectified_LeftEvent_image, rectified_RightEvent_image, rectified_projected_depth
+        X1, Y1, Z1 = P1[0], P1[1], P1[2]
+        infront = Z1 > 0
+        if not np.any(infront):
+            return np.zeros((H1, W1), dtype=np.uint16)
 
-if __name__ == '__main__':
-    
-    pc = 'mac'
-    disk = 'NSEK0'
-    if pc == 'mac':
-        disk = os.path.join('/Volumes/', disk)
-    elif pc == 'dell':
-        disk = os.path.join('/media/chengming/', disk)
-    kitchen = 'K_FCM'
-    activity = 'cereal_bowl'
+        X1, Y1, Z1 = X1[infront], Y1[infront], Z1[infront]
 
-    projector = Pixel_Projector(calibration_path=os.path.join(disk, kitchen, 'calibration'),
-                                data_path=os.path.join(disk, kitchen, activity))
-    
-    rectified_LeftEvent_image, rectified_RightEvent_image, rectified_projected_depth = projector.project_and_rectify(1704555877.345131)
+        # Project to cam1 (float pixel coords)
+        fx1, fy1 = K1[0, 0], K1[1, 1]
+        cx1, cy1 = K1[0, 2], K1[1, 2]
+        u = fx1 * (X1 / Z1) + cx1
+        v = fy1 * (Y1 / Z1) + cy1
 
+        # Bilinear splat with a z-buffer winner per pixel
+        zbuf = np.full((H1, W1), np.inf, dtype=np.float32)
 
+        x0i = np.floor(u).astype(np.int32)
+        y0i = np.floor(v).astype(np.int32)
+        x1i = x0i + 1
+        y1i = y0i + 1
 
+        wx = (u - x0i).astype(np.float32)
+        wy = (v - y0i).astype(np.float32)
 
+        w00 = (1 - wx) * (1 - wy)
+        w10 = wx * (1 - wy)
+        w01 = (1 - wx) * wy
+        w11 = wx * wy
+
+        def splat_corner(xi, yi, wi):
+            inside = (xi >= 0) & (xi < W1) & (yi >= 0) & (yi < H1) & (wi > 0)
+            xi = xi[inside]
+            yi = yi[inside]
+            zi = Z1[inside]
+
+            # Occlusion-aware: replace only when the new point is nearer.
+            for xpx, ypx, zpx in zip(xi, yi, zi):
+                if zpx < zbuf[ypx, xpx]:
+                    zbuf[ypx, xpx] = zpx
+
+        splat_corner(x0i, y0i, w00)
+        splat_corner(x1i, y0i, w10)
+        splat_corner(x0i, y1i, w01)
+        splat_corner(x1i, y1i, w11)
+
+        # Depth output from z-buffer (meters -> mm)
+        depth1_mm = np.zeros((H1, W1), dtype=np.uint16)
+        depth_valid = zbuf < np.inf
+        depth1_mm[depth_valid] = np.clip(
+            zbuf[depth_valid] * 1000.0, 0, 65535
+        ).astype(np.uint16)
+
+        return depth1_mm
