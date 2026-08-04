@@ -1,5 +1,5 @@
 # EventKitchen_toolkit
-This is the toolkit of the EventKitchen dataset from our ECCV 2026 paper "Cooking beyond Frames: A Stereo Event Camera Dataset in the Kitchen." In this toolkit, we present how to load the data and prepare data for action recognition, object detection, and stereo depth estimation.
+This is the toolkit of the EventKitchen dataset from our ECCV 2026 paper ***"Cooking beyond Frames: A Stereo Event Camera Dataset in the Kitchen."*** In this toolkit, we present how to load the data and prepare data for action recognition, object detection, and stereo depth estimation.
 
 <p align="center">
   <a href="https://arxiv.org/abs/YOUR_ARXIV_ID"><img src="https://img.shields.io/badge/arXiv-Paper-b31b1b?logo=arxiv&logoColor=white" alt="arXiv"></a>&nbsp;&nbsp;&nbsp;
@@ -21,7 +21,7 @@ Please follow the [dataset download page](https://chengmingf.github.io/EventKitc
 ## Action Recognition
 <!-- We introduce the groud truth and baselines for action recognition here. -->
 ### Action Segment
-The action annotations are saved in the .csv format as below:
+The action annotations are saved in the .csv files. The format is shown below:
 | Full_action_label | Action_label | Verb | Object | Global_start_time | Global_end_time | Length   |
 | --- | --- | --- | --- | --- | --- | --- |
 |Take fruit         | Take fruit | Take | fruit | 1704552331.171166 | 1704552336.109683 | 4.938517 |
@@ -38,7 +38,8 @@ The action annotations are saved in the .csv format as below:
 - **Global_end_time**: the end timestamp to locate the start of the action in multi-modal recordings, in the unit of second.
 - **Length**: the time length of the action segment.
 
-To prepare the data, use the global start and end timestamp to align the events and action segments. Please refer to the [prepare_action_recognition.ipynb](prepare_action_recognition.ipynb) for loading action segments.
+### Prepare data
+To prepare the data, we use the global start and end timestamp to align the events and action segments. Please refer to the [prepare_action_recognition.ipynb](prepare_action_recognition.ipynb) for loading action segments.
 
 ### Baselines
 We evaluate [TSM](https://github.com/mit-han-lab/temporal-shift-module) and [Swin](https://github.com/SwinTransformer/Video-Swin-Transformer) for action recognition as reported in the paper. To reproduce the results, please refer to their official github repo. And all implementation details are reported in the supplemetary matirals.
@@ -46,7 +47,7 @@ We evaluate [TSM](https://github.com/mit-han-lab/temporal-shift-module) and [Swi
 ## Object Detection
 <!-- We introduce the groud truth and baselines for object detection here. -->
 ### Bounding Box
-Bounding boxes are saved in .csv files as below:
+Bounding boxes are saved in .csv files. The format is shown below:
 | ts | bbox |
 | --- | --- |
 | 1704552350.708145 | [{'x': 848, 'y': 127, 'w': 337, 'h': 326, 'class': 'Box'}] |
@@ -63,15 +64,16 @@ Bounding boxes are saved in .csv files as below:
      'h': height of the bounding box,  
      'class': object class of the bounding box}.  
 
-To prepare the data, use the global timestamp to align the events and bounding boxes. Please refer to the [prepare_object_detection.ipynb](prepare_object_detection.ipynb) for loading bounding boxes.
+### Prepare data
+To prepare the data, we use the global timestamp to align the events and bounding boxes. Please refer to the [prepare_object_detection.ipynb](prepare_object_detection.ipynb) for loading bounding boxes.
 
 ### Baselines
 We evaluate [YOLOv10](https://github.com/THU-MIG/yolov10), [RVT](https://github.com/uzh-rpg/rvt), and [EvRT-DETR](https://github.com/realtime-intelligence/evrt-detr) for object detection as reported in the paper. To reproduce the results, please refer to their official github repo. And all implementation details are reported in the supplemetary matirals.
 
 ## Stereo Depth Estimation
-To prepare the stereo depth estimation, the first step is to convert the depth videos to depth map; the second setp is to convert the 
-### Depth Maps
-The depth maps are saved in .avi videos. The corrsponding global timestamp per depth map is saved in .csv file as:
+
+### Extract Depth Maps
+The depth maps are saved in .avi videos. And the corrsponding global timestamp per depth map is saved in .csv file as:
 | frame_id | timestamp |
 | --- | --- |
 | 0 | 1717341546.164076 |
@@ -88,6 +90,9 @@ the projected depth. Follow the listed steps to prepare the data:
 
 1. Download the calibration results and unzip, see [Project Page](https://chengmingf.github.io/EventKitchen.github.io/download.html).
 2. We provide a [python script](calibration_loader/EventKitchen_Calibration.py) for loading the calibration matrix. To rectify the depth and events, please refer to the [preapare_stereo_depth_estimation.ipynb](preapare_stereo_depth_estimation.ipynb).
+
+### Baselines
+We evaluate [SE-CFF](https://github.com/yonseivnl/se-cff) and [FoundationStereo](https://github.com/NVlabs/FoundationStereo) for stereo depth estimation as reported in the paper. To reproduce the results, please refer to their official github repo. And all implementation details are reported in the supplemetary matirals.
 
 ## Cite us
 If you use EventKitchen in your research, please cite:
