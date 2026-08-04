@@ -80,17 +80,19 @@ class Calibration_Loader():
         K1: np.ndarray,           # (3,3) intrinsics for event cam image (target)
         R_0to1: np.ndarray,       # (3,3) cam0 -> cam1
         T_0to1_mm: np.ndarray,    # (3,) or (3,1) cam0 -> cam1 translation in millimeters
-        event_size: tuple,        # (W1, H1)
+        splat_kernel_size: int = 4,
     ):
         """
         Output:
         depth1_mm : (H1,W1) uint16 (0 invalid)
         Notes:
-        - Uses bilinear splatting to reduce holes
+        - Uses a configurable target-pixel footprint to reduce projection holes
         - Uses per-pixel z-buffer so nearer points win (keeps occlusions correct)
         """
-        W1, H1 = event_size
+        W1, H1 = 1280, 720
         H0, W0 = depth0_mm.shape
+        if splat_kernel_size < 1:
+            raise ValueError("splat_kernel_size must be at least 1")
 
         # Convert depth to meters
         Z0 = depth0_mm.astype(np.float32) * 0.001
@@ -133,37 +135,19 @@ class Calibration_Loader():
         u = fx1 * (X1 / Z1) + cx1
         v = fy1 * (Y1 / Z1) + cy1
 
-        # Bilinear splat with a z-buffer winner per pixel
+        # Expand each projected point over a local footprint. This fills small
+        # sampling gaps while the z-buffer preserves the nearest surface.
         zbuf = np.full((H1, W1), np.inf, dtype=np.float32)
+        half_extent = (splat_kernel_size - 1) / 2.0
+        x_start = np.floor(u - half_extent).astype(np.int32)
+        y_start = np.floor(v - half_extent).astype(np.int32)
 
-        x0i = np.floor(u).astype(np.int32)
-        y0i = np.floor(v).astype(np.int32)
-        x1i = x0i + 1
-        y1i = y0i + 1
-
-        wx = (u - x0i).astype(np.float32)
-        wy = (v - y0i).astype(np.float32)
-
-        w00 = (1 - wx) * (1 - wy)
-        w10 = wx * (1 - wy)
-        w01 = (1 - wx) * wy
-        w11 = wx * wy
-
-        def splat_corner(xi, yi, wi):
-            inside = (xi >= 0) & (xi < W1) & (yi >= 0) & (yi < H1) & (wi > 0)
-            xi = xi[inside]
-            yi = yi[inside]
-            zi = Z1[inside]
-
-            # Occlusion-aware: replace only when the new point is nearer.
-            for xpx, ypx, zpx in zip(xi, yi, zi):
-                if zpx < zbuf[ypx, xpx]:
-                    zbuf[ypx, xpx] = zpx
-
-        splat_corner(x0i, y0i, w00)
-        splat_corner(x1i, y0i, w10)
-        splat_corner(x0i, y1i, w01)
-        splat_corner(x1i, y1i, w11)
+        for offset_y in range(splat_kernel_size):
+            yi = y_start + offset_y
+            for offset_x in range(splat_kernel_size):
+                xi = x_start + offset_x
+                inside = (xi >= 0) & (xi < W1) & (yi >= 0) & (yi < H1)
+                np.minimum.at(zbuf, (yi[inside], xi[inside]), Z1[inside])
 
         # Depth output from z-buffer (meters -> mm)
         depth1_mm = np.zeros((H1, W1), dtype=np.uint16)
