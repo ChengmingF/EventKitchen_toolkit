@@ -16,7 +16,7 @@ This is the toolkit of the EventKitchen dataset from our ECCV 2026 paper "Cookin
 - [Cite us](#cite-us)
 
 ## Load Events
-Please follow the [dataset download page](https://chengmingf.github.io/EventKitchen.github.io/download.html) to download the dataset and refer to the dataset structure. The collected events are saved in the [DSEC format](https://dsec.ifi.uzh.ch/data-format/), please refer to this [python script](event_reader/eventslicer.py) to load events. Please refer to the [read_event_file.ipynb](read_event_file.ipynb) for loading events.
+Please follow the [dataset download page](https://chengmingf.github.io/EventKitchen.github.io/download.html) to download the dataset and refer to the dataset structure. The collected events are saved in the [DSEC format](https://dsec.ifi.uzh.ch/data-format/). Please refer to the [read_event_file.ipynb](read_event_file.ipynb) for loading events.
 
 ## Action Recognition
 <!-- We introduce the groud truth and baselines for action recognition here. -->
