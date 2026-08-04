@@ -5,9 +5,11 @@ This is the toolkit of the EventKitchen dataset from our ECCV 2026 paper "Cookin
   <a href="https://arxiv.org/abs/YOUR_ARXIV_ID">
     <img src="https://img.shields.io/badge/arXiv-Paper-b31b1b?logo=arxiv&logoColor=white" alt="arXiv">
   </a>
+  &nbsp;&nbsp;&nbsp;
   <a href="https://chengmingf.github.io/EventKitchen.github.io/">
     <img src="https://img.shields.io/badge/Project-Page-1f6f68?logo=githubpages&logoColor=white" alt="Project Page">
   </a>
+  &nbsp;&nbsp;&nbsp;
   <a href="https://data.4tu.nl/datasets/583f8a2f-5448-4a9f-84c7-caaca92b1835">
     <img src="https://img.shields.io/badge/4TU-Dataset-0076a8" alt="Dataset">
   </a>
