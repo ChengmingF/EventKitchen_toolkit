@@ -2,17 +2,9 @@
 This is the toolkit of the EventKitchen dataset from our ECCV 2026 paper "Cooking beyond Frames: A Stereo Event Camera Dataset in the Kitchen." In this toolkit, we present how to load the data and prepare data for action recognition, object detection, and stereo depth estimation.
 
 <p align="center">
-  <a href="https://arxiv.org/abs/YOUR_ARXIV_ID">
-    <img src="https://img.shields.io/badge/arXiv-Paper-b31b1b?logo=arxiv&logoColor=white" alt="arXiv">
-  </a>
-  &nbsp;&nbsp;&nbsp;
-  <a href="https://chengmingf.github.io/EventKitchen.github.io/">
-    <img src="https://img.shields.io/badge/Project-Page-1f6f68?logo=githubpages&logoColor=white" alt="Project Page">
-  </a>
-  &nbsp;&nbsp;&nbsp;
-  <a href="https://data.4tu.nl/datasets/583f8a2f-5448-4a9f-84c7-caaca92b1835">
-    <img src="https://img.shields.io/badge/4TU-Dataset-0076a8" alt="Dataset">
-  </a>
+  <a href="https://arxiv.org/abs/YOUR_ARXIV_ID"><img src="https://img.shields.io/badge/arXiv-Paper-b31b1b?logo=arxiv&logoColor=white" alt="arXiv"></a>&nbsp;&nbsp;&nbsp;
+  <a href="https://chengmingf.github.io/EventKitchen.github.io/"><img src="https://img.shields.io/badge/Project-Page-1f6f68?logo=githubpages&logoColor=white" alt="Project Page"></a>&nbsp;&nbsp;&nbsp;
+  <a href="https://data.4tu.nl/datasets/583f8a2f-5448-4a9f-84c7-caaca92b1835"><img src="https://img.shields.io/badge/4TU-Dataset-0076a8" alt="Dataset"></a>
 </p>
 
 ## Table of Contents
@@ -24,7 +16,7 @@ This is the toolkit of the EventKitchen dataset from our ECCV 2026 paper "Cookin
 - [Cite us](#cite-us)
 
 ## Load Events
-The collected events are saved in the [DSEC format](https://dsec.ifi.uzh.ch/data-format/), please refer to this [python script](event_reader/eventslicer.py) to load events. Please refer to the [read_event_file.ipynb](read_event_file.ipynb) for loading events.
+Please follow the [dataset download page](https://chengmingf.github.io/EventKitchen.github.io/download.html) to download the dataset and refer to the dataset structure. The collected events are saved in the [DSEC format](https://dsec.ifi.uzh.ch/data-format/), please refer to this [python script](event_reader/eventslicer.py) to load events. Please refer to the [read_event_file.ipynb](read_event_file.ipynb) for loading events.
 
 ## Action Recognition
 <!-- We introduce the groud truth and baselines for action recognition here. -->
