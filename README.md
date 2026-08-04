@@ -13,6 +13,14 @@ This is the toolkit of the EventKitchen dataset from our ECCV 2026 paper "Cookin
   </a>
 </p>
 
+## Table of Contents
+
+- [Load Events](#load-events)
+- [Action Recognition](#action-recognition)
+- [Object Detection](#object-detection)
+- [Stereo Depth Estimation](#stereo-depth-estimation)
+- [Cite us](#cite)
+
 ## Load Events
 The collected events are saved in the [DSEC format](https://dsec.ifi.uzh.ch/data-format/), please refer to this [python script](event_reader/eventslicer.py) to load events. Please refer to the [read_event_file.ipynb](read_event_file.ipynb) for loading events.
 
@@ -87,3 +95,9 @@ the projected depth. Follow the listed steps to prepare the data:
 1. Download the calibration results and unzip, see [Project Page](https://chengmingf.github.io/EventKitchen.github.io/download.html).
 2. We provide a [python script](calibration_loader/EventKitchen_Calibration.py) for loading the calibration matrix. To rectify the depth and events, please refer to the [preapare_stereo_depth_estimation.ipynb](preapare_stereo_depth_estimation.ipynb).
 
+## Cite us
+If you use EventKitchen in your research, please cite:
+```bibtex
+@inproceedings{
+}
+```
