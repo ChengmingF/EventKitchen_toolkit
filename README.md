@@ -97,6 +97,10 @@ We evaluate [SE-CFF](https://github.com/yonseivnl/se-cff) and [FoundationStereo]
 ## Cite us
 If you use EventKitchen in your research, please cite:
 ```bibtex
-@inproceedings{
+@article{feng2026cooking,
+  title={Cooking beyond Frames: A Stereo Event Camera Dataset in the Kitchen},
+  author={Feng, Chengming and Araghi, Hesam and Zheng, Liming and Dupeyroux, Julien and Zhang, Xucong and van Gemert, Jan and T{\"o}men, Nergis},
+  journal={arXiv preprint arXiv:2608.04865},
+  year={2026}
 }
 ```
