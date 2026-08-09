@@ -99,6 +99,14 @@ We evaluate [SE-CFF](https://github.com/yonseivnl/se-cff) and [FoundationStereo]
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | vege_salad | cereal_bowl | fry_bacon | sandwich | fry_egg | lemon_water | sandwich | cut_bread | fry_pepper | fruit_salad |
 | cereal_bowl | coffee | fry_egg | tea_1 | cut_egg | coffee | wash_dish | sandwich | fry_bacon | vege_salad |
+| - | - | - | cut_bread | - | - | tea | - | - | - |
+
+**Test set**
+| Session 03 | Session 04 | Session 10 | Session 14 |
+| :---: | :---: | :---: | :---: |
+| cut_bread | wash_dish | fry_pepper | coffee |
+| tea_2 | cereal_bowl | fry_egg | vege_salad |
+| coffee | cut_bread | - | - |
 
 ## Cite us
 If you use EventKitchen in your research, please cite:
