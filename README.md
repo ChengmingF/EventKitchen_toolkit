@@ -92,8 +92,12 @@ the projected depth. Follow the listed steps to prepare the data:
 2. We provide a [python script](calibration_loader/EventKitchen_Calibration.py) for loading the calibration matrix. To rectify the depth and events, please refer to the [preapare_stereo_depth_estimation.ipynb](preapare_stereo_depth_estimation.ipynb).
 
 ### Baselines
-We evaluate [SE-CFF](https://github.com/yonseivnl/se-cff) and [FoundationStereo](https://github.com/NVlabs/FoundationStereo) for stereo depth estimation as reported in the paper. To reproduce the results, please refer to their official github repo. And all implementation details are reported in the supplemetary matirals.
+We evaluate [SE-CFF](https://github.com/yonseivnl/se-cff) and [FoundationStereo](https://github.com/NVlabs/FoundationStereo) for stereo depth estimation as reported in the paper. To reproduce the results, please refer to their official github repo. And all implementation details are reported in the supplemetary matirals. And as reported in the paper, we use a subset of the recorded sessions to evaluate the stereo depth estimation. The subset is shown as:
 
+**Training set**
+| Session 01 | Session 02 | Session 05 | Session 06 | Session 07 | Session 08 | Session 09 | Session 11 | Session 12 | Session 13 |
+| vege_salad | cereal_bowl | fry_bacon | sandwich | fry_egg | lemon_water | sandwich | cut_bread | fry_pepper | fruit_salad |
+| cereal_bowl | make_coffee | fry_egg | tea_1 | cut_egg | make_coffee | wash_dish | sandwich | fry_bacon | vege_salad |
 ## Cite us
 If you use EventKitchen in your research, please cite:
 ```bibtex
