@@ -15,8 +15,11 @@ This is the toolkit of the EventKitchen dataset from our ECCV 2026 paper ***"Coo
 - [Stereo Depth Estimation](#stereo-depth-estimation)
 - [Cite us](#cite-us)
 
-## Load Events
+## Load data
 Please follow the [dataset download page](https://chengmingf.github.io/EventKitchen.github.io/download.html) to download the dataset and refer to the dataset structure. The collected events are saved in the [DSEC format](https://dsec.ifi.uzh.ch/data-format/). Please refer to the [read_event_file.ipynb](read_event_file.ipynb) for loading events.
+
+### Dataset split
+We split the dataset in session level, the training set including Session 1, 2, 5, 6, 7, 8, 9, 11, 12, 13; the test set including Session 3, 4, 10, 14. Also saved in [dataset_split.csv](dataset_split.csv)
 
 ## Action Recognition
 <!-- We introduce the groud truth and baselines for action recognition here. -->
