@@ -39,7 +39,7 @@ The action annotations are saved in the .csv files. The format is shown below:
 - **Length**: the time length of the action segment.
 
 ### Prepare data
-To prepare the data, we use the global start and end timestamp to align the events and action segments. Please refer to the [prepare_action_recognition.ipynb](prepare_action_recognition.ipynb) for loading action segments.
+To prepare the data, we use the global start and end timestamp to align the events and action segments. And as reported in the paper, we use a subset of 69 actoin classes to train baselines, as shown in [action_subset.csv](action_subset.csv). Please refer to the [prepare_action_recognition.ipynb](prepare_action_recognition.ipynb) for loading action segments.
 
 ### Baselines
 We evaluate [TSM](https://github.com/mit-han-lab/temporal-shift-module) and [Swin](https://github.com/SwinTransformer/Video-Swin-Transformer) for action recognition as reported in the paper. To reproduce the results, please refer to their official github repo. And all implementation details are reported in the supplemetary matirals.
@@ -95,18 +95,20 @@ the projected depth. Follow the listed steps to prepare the data:
 We evaluate [SE-CFF](https://github.com/yonseivnl/se-cff) and [FoundationStereo](https://github.com/NVlabs/FoundationStereo) for stereo depth estimation as reported in the paper. To reproduce the results, please refer to their official github repo. And all implementation details are reported in the supplemetary matirals. And as reported in the paper, we use a subset of the recorded sessions to evaluate the stereo depth estimation. The subset is shown as:
 
 **Training set**
+
 | Session 01 | Session 02 | Session 05 | Session 06 | Session 07 | Session 08 | Session 09 | Session 11 | Session 12 | Session 13 |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | vege_salad | cereal_bowl | fry_bacon | sandwich | fry_egg | lemon_water | sandwich | cut_bread | fry_pepper | fruit_salad |
-| cereal_bowl | coffee | fry_egg | tea_1 | cut_egg | coffee | wash_dish | sandwich | fry_bacon | vege_salad |
+| cereal_bowl | cut_bread | fry_egg | tea_1 | cut_cake | coffee | wash_dish | sandwich | fry_bacon | vege_salad |
 | - | - | - | cut_bread | - | - | tea | - | - | - |
 
 **Test set**
+
 | Session 03 | Session 04 | Session 10 | Session 14 |
 | :---: | :---: | :---: | :---: |
-| cut_bread | wash_dish | fry_pepper | coffee |
-| tea_2 | cereal_bowl | fry_egg | vege_salad |
-| coffee | cut_bread | - | - |
+| cut_bread | coffee | fry_pepper | wash_dish |
+| tea_2 | vege_salad | fry_egg | cereal_bowl |
+| coffee | - | - | cut_bread |
 
 ## Cite us
 If you use EventKitchen in your research, please cite:
