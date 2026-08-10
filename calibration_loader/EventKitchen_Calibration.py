@@ -11,7 +11,7 @@ from matplotlib import pyplot as plt
 
 class Calibration_Loader():
     """
-    Match pixels between event cameras and the dpeth caemra. 
+    Match pixels between event cameras and the depth camera.
     """
     def __init__(self, calibration_path):
         """
@@ -44,7 +44,7 @@ class Calibration_Loader():
         #### Read DRGB -- LeftEvent extrinsic matrix
         self.rotation_matrix_DRGB_LeftEvent, self.translation_matrix_DRGB_LeftEvent, _, _, _, _ = self.read_extrinsic_calibration(calibration_path, camA='DRGB', camB='LeftEvent')
         
-        # #### Read DRGB -- RighttEvent extrinsic matrix
+        # #### Read DRGB -- RightEvent extrinsic matrix
         # self.rotation_matrix_DRGB_RightEvent, self.translation_matrix_DRGB_RightEvent, _, _, _, _ = self.read_extrinsic_calibration(calibration_path, camA='DRGB', camB='RightEvent')
         
         ####

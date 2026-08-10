@@ -9,7 +9,7 @@ This is the toolkit of the EventKitchen dataset from our ECCV 2026 paper ***"Coo
 
 ## Table of Contents
 
-- [Load Events](#load-events)
+- [Load Data](#load-data)
 - [Action Recognition](#action-recognition)
 - [Object Detection](#object-detection)
 - [Stereo Depth Estimation](#stereo-depth-estimation)
@@ -19,10 +19,10 @@ This is the toolkit of the EventKitchen dataset from our ECCV 2026 paper ***"Coo
 Please follow the [dataset download page](https://chengmingf.github.io/EventKitchen.github.io/download.html) to download the dataset and refer to the dataset structure. The collected events are saved in the [DSEC format](https://dsec.ifi.uzh.ch/data-format/). Please refer to the [read_event_file.ipynb](read_event_file.ipynb) for loading events.
 
 ### Dataset split
-We split the dataset in session level, the training set including Session 1, 2, 5, 6, 7, 8, 9, 11, 12, 13; the test set including Session 3, 4, 10, 14. Also saved in [dataset_split.csv](dataset_split.csv)
+We split the dataset at the session level. The training set includes Sessions 1, 2, 5, 6, 7, 8, 9, 11, 12, and 13; the test set includes Sessions 3, 4, 10, and 14. The split is also saved in [dataset_split.csv](dataset_split.csv).
 
 ## Action Recognition
-<!-- We introduce the groud truth and baselines for action recognition here. -->
+<!-- We introduce the ground truth and baselines for action recognition here. -->
 ### Action Segment
 The action annotations are saved in the .csv files. The format is shown below:
 | Full_action_label | Action_label | Verb | Object | Global_start_time | Global_end_time | Length   |
@@ -34,21 +34,21 @@ The action annotations are saved in the .csv files. The format is shown below:
 | ... | ... | ... | ... | ... | ... | ... |
 
 - **Full_action_label**: the full label of the action.
-- **Action_label**: composed as "Verb" + "Noun". This label used to train the **Action Recognition** baselines.
+- **Action_label**: composed as "Verb" + "Noun". This label is used to train the **Action Recognition** baselines.
 - **Verb**: the verb component in the action label.
 - **Object**: the noun component in the action label.
-- **Global_start_time**: the global timestamp to locate the start of the action in multi-modal recordings, in the unit of second.
-- **Global_end_time**: the end timestamp to locate the start of the action in multi-modal recordings, in the unit of second.
+- **Global_start_time**: the global timestamp locating the start of the action in multimodal recordings, in seconds.
+- **Global_end_time**: the global timestamp locating the end of the action in multimodal recordings, in seconds.
 - **Length**: the time length of the action segment.
 
 ### Prepare data
-To prepare the data, we use the global start and end timestamp to align the events and action segments. And as reported in the paper, we use a subset of 69 actoin classes to train baselines, as shown in [action_subset.csv](action_subset.csv). Please refer to the [prepare_action_recognition.ipynb](prepare_action_recognition.ipynb) for loading action segments.
+To prepare the data, we use the global start and end timestamps to align the events and action segments. As reported in the paper, we use a subset of 69 action classes to train the baselines, as shown in [action_subset.csv](action_subset.csv). Please refer to [prepare_action_recognition.ipynb](prepare_action_recognition.ipynb) for loading action segments.
 
 ### Baselines
-We evaluate [TSM](https://github.com/mit-han-lab/temporal-shift-module) and [Swin](https://github.com/SwinTransformer/Video-Swin-Transformer) for action recognition as reported in the paper. To reproduce the results, please refer to their official github repo. And all implementation details are reported in the supplemetary matirals.
+We evaluate [TSM](https://github.com/mit-han-lab/temporal-shift-module) and [Swin](https://github.com/SwinTransformer/Video-Swin-Transformer) for action recognition as reported in the paper. To reproduce the results, please refer to their official GitHub repositories. All implementation details are reported in the supplementary materials.
 
 ## Object Detection
-<!-- We introduce the groud truth and baselines for object detection here. -->
+<!-- We introduce the ground truth and baselines for object detection here. -->
 ### Bounding Box
 Bounding boxes are saved in .csv files. The format is shown below:
 | ts | bbox |
@@ -59,10 +59,10 @@ Bounding boxes are saved in .csv files. The format is shown below:
 | 1704552374.8697 | [{'x': 558, 'y': 14, 'w': 585, 'h': 539, 'class': 'Bowl'}, {'x': 453, 'y': 436, 'w': 331, 'h': 276, 'class': 'Box'}] |
 | ... | ... |
 
-- **ts**: the global timestamp of the bounding box, in the unit of second.
+- **ts**: the global timestamp of the bounding box, in seconds.
 - **bbox**: the bounding boxes in the dictionary, with  
-    {'x': x-axis of the topleft corner,  
-     'y': y-axis of the topleft corner,  
+    {'x': x-axis of the top-left corner,
+     'y': y-axis of the top-left corner,
      'w': width of the bounding box,  
      'h': height of the bounding box,  
      'class': object class of the bounding box}.  
@@ -71,12 +71,12 @@ Bounding boxes are saved in .csv files. The format is shown below:
 To prepare the data, we use the global timestamp to align the events and bounding boxes. Please refer to the [prepare_object_detection.ipynb](prepare_object_detection.ipynb) for loading bounding boxes.
 
 ### Baselines
-We evaluate [YOLOv10](https://github.com/THU-MIG/yolov10), [RVT](https://github.com/uzh-rpg/rvt), and [EvRT-DETR](https://github.com/realtime-intelligence/evrt-detr) for object detection as reported in the paper. To reproduce the results, please refer to their official github repo. And all implementation details are reported in the supplemetary matirals.
+We evaluate [YOLOv10](https://github.com/THU-MIG/yolov10), [RVT](https://github.com/uzh-rpg/rvt), and [EvRT-DETR](https://github.com/realtime-intelligence/evrt-detr) for object detection as reported in the paper. To reproduce the results, please refer to their official GitHub repositories. All implementation details are reported in the supplementary materials.
 
 ## Stereo Depth Estimation
 
 ### Extract Depth Maps
-The depth maps are saved in .avi videos. And the corrsponding global timestamp per depth map is saved in .csv file as:
+The depth maps are saved in .avi videos, and the corresponding global timestamp for each depth map is saved in a .csv file:
 | frame_id | timestamp |
 | --- | --- |
 | 0 | 1717341546.164076 |
@@ -88,14 +88,13 @@ The depth maps are saved in .avi videos. And the corrsponding global timestamp p
 Please refer to the [extract_depth_map.ipynb](extract_depth_map.ipynb) to extract depth maps.
 
 ### Rectification
-To conduct the stereo depth estimation, you need to firstly project the depth map to the left event camera, then recitify the left event camera, right event camera camera, and
-the projected depth. Follow the listed steps to prepare the data:
+To conduct stereo depth estimation, first project the depth map to the left event camera, then rectify the projected depth and the left and right event data. Follow these steps to prepare the data:
 
 1. Download the calibration results and unzip, see [Project Page](https://chengmingf.github.io/EventKitchen.github.io/download.html).
-2. We provide a [python script](calibration_loader/EventKitchen_Calibration.py) for loading the calibration matrix. To rectify the depth and events, please refer to the [preapare_stereo_depth_estimation.ipynb](preapare_stereo_depth_estimation.ipynb).
+2. We provide a [Python script](calibration_loader/EventKitchen_Calibration.py) for loading the calibration matrices. To rectify the depth and events, please refer to [prepare_stereo_depth_estimation.ipynb](prepare_stereo_depth_estimation.ipynb).
 
 ### Baselines
-We evaluate [SE-CFF](https://github.com/yonseivnl/se-cff) and [FoundationStereo](https://github.com/NVlabs/FoundationStereo) for stereo depth estimation as reported in the paper. To reproduce the results, please refer to their official github repo. And all implementation details are reported in the supplemetary matirals. And as reported in the paper, we use a subset of the recorded sessions to evaluate the stereo depth estimation. The subset is shown as:
+We evaluate [SE-CFF](https://github.com/yonseivnl/se-cff) and [FoundationStereo](https://github.com/NVlabs/FoundationStereo) for stereo depth estimation as reported in the paper. To reproduce the results, please refer to their official GitHub repositories. All implementation details are reported in the supplementary materials. As reported in the paper, we use a subset of the recorded sessions to evaluate stereo depth estimation. The subset is shown below:
 
 **Training set** [train_depth_map.csv](train_depth_map.csv)
 
