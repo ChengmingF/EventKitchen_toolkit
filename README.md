@@ -2,7 +2,7 @@
 This is the toolkit of the EventKitchen dataset from our ECCV 2026 paper ***"Cooking beyond Frames: A Stereo Event Camera Dataset in the Kitchen."*** In this toolkit, we present how to load the data and prepare data for action recognition, object detection, and stereo depth estimation.
 
 <p align="center">
-  <a href="https://arxiv.org/abs/YOUR_ARXIV_ID"><img src="https://img.shields.io/badge/arXiv-Paper-b31b1b?logo=arxiv&logoColor=white" alt="arXiv"></a>&nbsp;&nbsp;&nbsp;
+  <a href="https://arxiv.org/abs/2608.04865"><img src="https://img.shields.io/badge/arXiv-Paper-b31b1b?logo=arxiv&logoColor=white" alt="arXiv"></a>&nbsp;&nbsp;&nbsp;
   <a href="https://chengmingf.github.io/EventKitchen.github.io/"><img src="https://img.shields.io/badge/Project-Page-1f6f68?logo=githubpages&logoColor=white" alt="Project Page"></a>&nbsp;&nbsp;&nbsp;
   <a href="https://data.4tu.nl/datasets/583f8a2f-5448-4a9f-84c7-caaca92b1835"><img src="https://img.shields.io/badge/4TU-Dataset-0076a8" alt="Dataset"></a>
 </p>
@@ -94,7 +94,7 @@ the projected depth. Follow the listed steps to prepare the data:
 ### Baselines
 We evaluate [SE-CFF](https://github.com/yonseivnl/se-cff) and [FoundationStereo](https://github.com/NVlabs/FoundationStereo) for stereo depth estimation as reported in the paper. To reproduce the results, please refer to their official github repo. And all implementation details are reported in the supplemetary matirals. And as reported in the paper, we use a subset of the recorded sessions to evaluate the stereo depth estimation. The subset is shown as:
 
-**Training set**
+**Training set** [train_depth_map.csv](train_depth_map.csv)
 
 | Session 01 | Session 02 | Session 05 | Session 06 | Session 07 | Session 08 | Session 09 | Session 11 | Session 12 | Session 13 |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -102,7 +102,7 @@ We evaluate [SE-CFF](https://github.com/yonseivnl/se-cff) and [FoundationStereo]
 | cereal_bowl | cut_bread | fry_egg | tea_1 | cut_cake | coffee | wash_dish | sandwich | fry_bacon | vege_salad |
 | - | - | - | cut_bread | - | - | tea | - | - | - |
 
-**Test set**
+**Test set** [test_depth_map.csv](test_depth_map.csv)
 
 | Session 03 | Session 04 | Session 10 | Session 14 |
 | :---: | :---: | :---: | :---: |
